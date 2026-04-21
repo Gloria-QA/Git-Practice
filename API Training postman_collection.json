@@ -1,0 +1,1036 @@
+{
+  "info": {
+    "_postman_id": "a10d9286-aa40-4e1f-b883-7f62eb38383f",
+    "name": "API Training - Advanced Trainee Scenarios (Local Java API)",
+    "description": "Advanced realistic test flows: auth, tokenized endpoints, cards, bill payments, idempotency, reversals, and simulator endpoints for negative testing.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "52825811",
+    "_collection_link": "https://go.postman.co/collection/52825811-a10d9286-aa40-4e1f-b883-7f62eb38383f?source=collection_link"
+  },
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Login Success",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.response.to.have.status(200);",
+                  "const body = pm.response.json();",
+                  "pm.expect(body).to.have.property('access_token');",
+                  "pm.environment.set('auth_token', body.access_token);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{login_email}}\",\n  \"password\": \"{{login_password}}\"\n}"
+            },
+            "url": {
+              "raw": "{{local_base_url}}/api/v1/auth/login",
+              "host": [
+                "{{local_base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "login"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Current User (/me)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.response.to.have.status(200);",
+                  "const body = pm.response.json();",
+                  "pm.expect(body.data.email).to.eql(pm.environment.get('login_email'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{local_base_url}}/api/v1/me",
+              "host": [
+                "{{local_base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "me"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Current User (/wrongAuth)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.response.to.have.status(200);",
+                  "const body = pm.response.json();",
+                  "pm.expect(body.data.email).to.eql(pm.environment.get('login_email'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{local_base_url}}/api/v1/me",
+              "host": [
+                "{{local_base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "me"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Current User (/wrong HTTP)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.response.to.have.status(200);",
+                  "const body = pm.response.json();",
+                  "pm.expect(body.data.email).to.eql(pm.environment.get('login_email'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{local_base_url}}/api/v1/me",
+              "host": [
+                "{{local_base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "me"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Login Failure (401)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.response.to.have.status(401);",
+                  "const body = pm.response.json();",
+                  "pm.expect(body.responseCode).to.eql('55');"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{login_email}}\",\n  \"password\": \"wrong-password\"\n}"
+            },
+            "url": {
+              "raw": "{{local_base_url}}/api/v1/auth/login",
+              "host": [
+                "{{local_base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "login"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Login Failure (401) ( incorrect username and valid password)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.response.to.have.status(401);",
+                  "const body = pm.response.json();",
+                  "pm.expect(body.responseCode).to.eql('55');"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{login_email}}\",\n  \"password\": \"wrong-password\"\n}"
+            },
+            "url": {
+              "raw": "{{local_base_url}}/api/v1/auth/login",
+              "host": [
+                "{{local_base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "login"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Login Failure (401) ( incorrect password and valid usernmae)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.response.to.have.status(401);",
+                  "const body = pm.response.json();",
+                  "pm.expect(body.responseCode).to.eql('55');"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{login_email}}\",\n  \"password\": \"wrong-password\"\n}"
+            },
+            "url": {
+              "raw": "{{local_base_url}}/api/v1/auth/login",
+              "host": [
+                "{{local_base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "login"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Login Failure (401) ( empty password)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.response.to.have.status(401);",
+                  "const body = pm.response.json();",
+                  "pm.expect(body.responseCode).to.eql('55');"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{login_email}}\",\n  \"password\": \"wrong-password\"\n}"
+            },
+            "url": {
+              "raw": "{{local_base_url}}/api/v1/auth/login",
+              "host": [
+                "{{local_base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "login"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Login Failure (400) ( empty username)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.response.to.have.status(401);",
+                  "const body = pm.response.json();",
+                  "pm.expect(body.responseCode).to.eql('55');"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{l}}\",\n  \"password\": \"{{login_password}}\"\n}"
+            },
+            "url": {
+              "raw": "{{local_base_url}}/api/v1/auth/login",
+              "host": [
+                "{{local_base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "login"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Login Failure (401) ( leading spacing username)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.response.to.have.status(401);",
+                  "const body = pm.response.json();",
+                  "pm.expect(body.responseCode).to.eql('55');"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{login_email}}\",\n  \"password\": \"wrong-password\"\n}"
+            },
+            "url": {
+              "raw": "{{local_base_url}}/api/v1/auth/login",
+              "host": [
+                "{{local_base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "login"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Login Failure (401) (leading spacing password)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.response.to.have.status(401);",
+                  "const body = pm.response.json();",
+                  "pm.expect(body.responseCode).to.eql('55');"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{login_email}}\",\n  \"password\": \"wrong-password\"\n}"
+            },
+            "url": {
+              "raw": "{{local_base_url}}/api/v1/auth/login",
+              "host": [
+                "{{local_base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "login"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Login Failure (401) (Empty body)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.response.to.have.status(401);",
+                  "const body = pm.response.json();",
+                  "pm.expect(body.responseCode).to.eql('55');"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{login_email}}\",\n  \"password\": \"wrong-password\"\n}"
+            },
+            "url": {
+              "raw": "{{local_base_url}}/api/v1/auth/login",
+              "host": [
+                "{{local_base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "login"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Login Failure (401) (trailing password)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.response.to.have.status(401);",
+                  "const body = pm.response.json();",
+                  "pm.expect(body.responseCode).to.eql('55');"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{login_email}}\",\n  \"password\": \"wrong-password\"\n}"
+            },
+            "url": {
+              "raw": "{{local_base_url}}/api/v1/auth/login",
+              "host": [
+                "{{local_base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "login"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Login Failure (401) (trailing username)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.response.to.have.status(401);",
+                  "const body = pm.response.json();",
+                  "pm.expect(body.responseCode).to.eql('55');"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{login_email}}\",\n  \"password\": \"wrong-password\"\n}"
+            },
+            "url": {
+              "raw": "{{local_base_url}}/api/v1/auth/login",
+              "host": [
+                "{{local_base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "login"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Cards",
+      "item": [
+        {
+          "name": "List Cards for Logged-in User",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.response.to.have.status(200);",
+                  "const body = pm.response.json();",
+                  "pm.expect(body.data).to.be.an('array');"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{local_base_url}}/api/v1/cards",
+              "host": [
+                "{{local_base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "cards"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Block Card",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.response.to.have.status(200);",
+                  "const body = pm.response.json();",
+                  "pm.expect(body.status).to.eql('BLOCKED');"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reason\": \"Suspicious activity during QA drill\"\n}"
+            },
+            "url": {
+              "raw": "{{local_base_url}}/api/v1/cards/{{card_id}}/block",
+              "host": [
+                "{{local_base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "cards",
+                "{{card_id}}",
+                "block"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Billers and Bill Payments",
+      "item": [
+        {
+          "name": "List Billers",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.response.to.have.status(200);",
+                  "const body = pm.response.json();",
+                  "pm.expect(body.count).to.be.a('number');"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{local_base_url}}/api/v1/billers",
+              "host": [
+                "{{local_base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "billers"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Bill Payment Success",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.environment.set('run_id', Date.now());"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.response.to.have.status(200);",
+                  "const body = pm.response.json();",
+                  "pm.expect(body.status).to.eql('SUCCESS');",
+                  "pm.expect(body.responseCode).to.eql('00');"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reference\": \"BILL-SUCCESS-{{run_id}}\",\n  \"accountNumber\": \"1000000001\",\n  \"billerCode\": \"DSTV\",\n  \"customerId\": \"SMARTCARD-111222\",\n  \"amount\": 2500\n}"
+            },
+            "url": {
+              "raw": "{{local_base_url}}/api/v1/bill-payments",
+              "host": [
+                "{{local_base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "bill-payments"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Bill Payment - Inactive Biller (200 + FAILED)",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.environment.set('run_id', Date.now());"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.response.to.have.status(200);",
+                  "const body = pm.response.json();",
+                  "pm.expect(body.status).to.eql('FAILED');",
+                  "pm.expect(body.responseCode).to.eql('91');"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reference\": \"BILL-FAIL-{{run_id}}\",\n  \"accountNumber\": \"1000000001\",\n  \"billerCode\": \"WAT01\",\n  \"customerId\": \"ACC-778899\",\n  \"amount\": 1200\n}"
+            },
+            "url": {
+              "raw": "{{local_base_url}}/api/v1/bill-payments",
+              "host": [
+                "{{local_base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "bill-payments"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Transfers and Reversal",
+      "item": [
+        {
+          "name": "Create Transfer for Reversal",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.environment.set('run_id', Date.now());"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.response.to.have.status(200);",
+                  "const body = pm.response.json();",
+                  "pm.environment.set('reversal_reference', body.transactionId.replace('TRF-', ''));",
+                  "pm.expect(body.status).to.eql('SUCCESS');"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reference\": \"TRF-REV-{{run_id}}\",\n  \"accountNumber\": \"1000000001\",\n  \"bankCode\": \"044\",\n  \"amount\": 300,\n  \"narration\": \"Transfer to reverse during QA session\"\n}"
+            },
+            "url": {
+              "raw": "{{local_base_url}}/api/v1/transfers",
+              "host": [
+                "{{local_base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "transfers"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Reverse Transfer",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.response.to.have.status(200);",
+                  "const body = pm.response.json();",
+                  "pm.expect(body.status).to.eql('SUCCESS');",
+                  "pm.expect(body.reversalReference).to.match(/^REV-/);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reason\": \"Beneficiary reported wrong credit\"\n}"
+            },
+            "url": {
+              "raw": "{{local_base_url}}/api/v1/transfers/{{reversal_reference}}/reversal",
+              "host": [
+                "{{local_base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "transfers",
+                "{{reversal_reference}}",
+                "reversal"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Simulator Endpoints",
+      "item": [
+        {
+          "name": "Simulate HTTP 500",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.response.to.have.status(500);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{local_base_url}}/api/v1/simulate/status/500",
+              "host": [
+                "{{local_base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "simulate",
+                "status",
+                "500"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Simulate HTTP 200 Business Failure",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.response.to.have.status(200);",
+                  "const body = pm.response.json();",
+                  "pm.expect(body.status).to.eql('FAILED');"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{local_base_url}}/api/v1/simulate/business-failure",
+              "host": [
+                "{{local_base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "simulate",
+                "business-failure"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Simulate Rate Limit (429)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.response.to.have.status(429);",
+                  "const body = pm.response.json();",
+                  "pm.expect(body.responseCode).to.eql('88');"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{local_base_url}}/api/v1/simulate/rate-limit",
+              "host": [
+                "{{local_base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "simulate",
+                "rate-limit"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}
